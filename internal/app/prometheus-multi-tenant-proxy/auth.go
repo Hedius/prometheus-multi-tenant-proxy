@@ -44,9 +44,13 @@ func AuthHandler(auth Auth, whitelist []string, handler http.HandlerFunc) http.H
 }
 
 func isInWhitelist(requestPath string, whitelist []string) bool {
-	allowed := false
 	for _, endpoint := range whitelist {
-		allowed = allowed || strings.HasSuffix(requestPath, endpoint)
+		if strings.HasSuffix(requestPath, endpoint) {
+			return true
+		}
+		if strings.Contains(requestPath, "*") && strings.Contains(requestPath, endpoint) {
+			return true
+		}
 	}
-	return allowed
+	return false
 }

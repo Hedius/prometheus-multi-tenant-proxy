@@ -27,7 +27,7 @@ func (r *ReversePrometheusRoundTripper) Director(req *http.Request) {
 			log.Printf("[ERROR]\t%s\n", err)
 		}
 	}
-	if strings.HasSuffix(req.URL.Path, "/api/v1/series") {
+	if strings.HasSuffix(req.URL.Path, "/api/v1/series") || strings.Contains(req.URL.Path, "/api/v1/labels") {
 		if err := r.modifyRequest(req, "match[]"); err != nil {
 			log.Printf("[ERROR]\t%s\n", err)
 		}
