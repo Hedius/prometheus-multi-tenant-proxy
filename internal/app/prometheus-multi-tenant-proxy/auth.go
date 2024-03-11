@@ -48,8 +48,11 @@ func isInWhitelist(requestPath string, whitelist []string) bool {
 		if strings.HasSuffix(requestPath, endpoint) {
 			return true
 		}
-		if strings.Contains(requestPath, "*") && strings.Contains(requestPath, endpoint) {
-			return true
+		if strings.Count(requestPath, "*") == 1 {
+			parts := strings.Split(requestPath, "*")
+			if strings.Contains(requestPath, parts[0]) && strings.HasSuffix(requestPath, parts[1]) {
+				return true
+			}
 		}
 	}
 	return false
