@@ -16,3 +16,6 @@ cmd/prometheus-multi-tenant-proxy/prometheus-multi-tenant-proxy
 
 # Jetbrains
 .idea
+
+# vscode
+.vscode
