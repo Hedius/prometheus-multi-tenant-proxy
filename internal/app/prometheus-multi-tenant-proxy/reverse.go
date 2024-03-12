@@ -27,7 +27,7 @@ func (r *ReversePrometheusRoundTripper) Director(req *http.Request) {
 			log.Printf("[ERROR]\t%s\n", err)
 		}
 	}
-	if strings.HasSuffix(req.URL.Path, "/api/v1/series") || strings.Contains(req.URL.Path, "/api/v1/labels") {
+	if strings.HasSuffix(req.URL.Path, "/api/v1/series") || strings.Contains(req.URL.Path, "/api/v1/label") {
 		if err := r.modifyRequest(req, "match[]"); err != nil {
 			log.Printf("[ERROR]\t%s\n", err)
 		}
@@ -84,28 +84,31 @@ func (r *ReversePrometheusRoundTripper) modifyRequest(req *http.Request, prometh
 
 	form := req.Form
 
-	for key, values := range form {
-		value := values[0]
-		if key == prometheusFormParameter {
-			expr, err := parser.ParseExpr(value)
-			if err != nil {
-				return err
-			}
-			log.Printf("[QUERY]\t%s ORIGINAL: %s\n", req.RemoteAddr, expr)
-			if len(namespaces) == 0 && len(l) == 0 {
-				log.Printf("[ERROR]\t%s\n", "no namespaces or labels found in request context")
-				// This is a hack to prevent the query from being executed.
-				value = ""
-			} else {
-				if err := e.EnforceNode(expr); err != nil {
-					return err
-				}
-				value = expr.String()
-			}
-			log.Printf("[QUERY]\t%s MODIFIED: %s\n", req.RemoteAddr, value)
-		}
-		form.Set(key, value)
+	var expr parser.Expr
+	var value string = "{" + labelMatchers[0].Name +  "=\"never_match\"}"
+	var err error
+	if form.Has(prometheusFormParameter) {
+		value = form[prometheusFormParameter][0]
 	}
+	expr, err = parser.ParseExpr(value)
+	if err != nil {
+		return err
+	}
+
+
+	log.Printf("[QUERY]\t%s ORIGINAL: %s\n", req.RemoteAddr, expr)
+	if len(namespaces) == 0 && len(l) == 0 {
+		log.Printf("[ERROR]\t%s\n", "no namespaces or labels found in request context")
+		// This is a hack to prevent the query from being executed.
+		value = ""
+	} else {
+		if err := e.EnforceNode(expr); err != nil {
+			return err
+		}
+		value = expr.String()
+	}
+	log.Printf("[QUERY]\t%s MODIFIED: %s\n", req.RemoteAddr, value)
+	form.Set(prometheusFormParameter, value)
 
 	newFormData := form.Encode()
 
