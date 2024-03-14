@@ -98,6 +98,8 @@ func TestReverse_ModifyGet(t *testing.T) {
 		{"query?query=label&time=1685685673.187"},
 		{"query_range?start=2023-04-17T13:37:00.781Z&end=2023-04-17T13:43:00.781Z&step=60s&query=label"},
 		{"series?start=2023-04-17T13:37:00.781Z&end=2023-04-17T13:43:00.781Z&match[]=up"},
+		{"labels?start=2023-04-17T13:37:00.781Z&end=2023-04-17T13:43:00.781Z&match[]=up"},
+		{"label/host/values?start=2023-04-17T13:37:00.781Z&end=2023-04-17T13:43:00.781Z&match[]=up"},
 	}
 
 	for _, tc := range testCases {
